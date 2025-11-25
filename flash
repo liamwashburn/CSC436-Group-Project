@@ -1,0 +1,18 @@
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route("/", methods=["GET"])
+def read_root():
+    return jsonify({"message": "Hello, World!"})
+
+@app.route("/items/<int:item_id>", methods=["GET"])
+def read_item(item_id):
+    q = request.args.get("q")
+    return jsonify({"item_id": item_id, "q": q, "sample_data": {"name": "Sample Item", "price": 10.99}})
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
+
+
