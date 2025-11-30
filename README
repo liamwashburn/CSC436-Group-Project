@@ -1,0 +1,8 @@
+-- CREATE/ACTIVATE VIRTUAL ENVIRONMENT
+python -m venv venv
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+.\venv\Scripts\Activate.ps1
+
+
+-- START SERVER http://127.0.0.1:8000/docs
+uvicorn fetches:app --reload --host 127.0.0.1 --port 8000
