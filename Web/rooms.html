@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Doctors Office</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="success-toast" class="toast-container">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Action Completed Successfully!</span>
+    </div>
+
+    <div class="layout-wrapper">
+        <main class="content-area">
+            <h1>Room Availability</h1>
+            <div class="main-card">
+                <div class="controls-header">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <label>Date:</label>
+                        <input type="date" id="date-selector" style="padding: 8px; border:1px solid var(--border); border-radius:6px;" onchange="loadRoomData()">
+                    </div>
+                </div>
+
+                <div class="scroll-wrapper">
+                    <div class="timeline-container" id="timeline-container">
+                    </div>
+                </div>
+            </div>
+        </main>
+        <nav class="sidebar-right">
+            <a href="index.html" class="nav-btn">
+                <i class="fa-regular fa-calendar-check"></i>
+                Appointments
+            </a>
+            <a href="billing.html" class="nav-btn">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+                Billing
+            </a>
+            <a href="patients.html" class="nav-btn">
+                <i class="fa-solid fa-users"></i>
+                Patients
+            </a>
+            <a href="rooms.html" class="nav-btn active">
+                <i class="fa-solid fa-door-open"></i>
+                Rooms
+            </a>
+        </nav>
+
+    </div>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Doctors Office</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="success-toast" class="toast-container">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Successfull</span>
+    </div>
+    <div class="layout-wrapper">
+        <main class="content-area">
+            <h1>Billing</h1>
+            <div class="main-card">
+                <div class="controls-header">
+                    <div style="display: flex; gap: 20px; align-items: center;">
+                        <input type="text" class="search-input" placeholder="Search invoice...">
+                        <div class="toggle-container">
+                            <label class="switch">
+                                <input type="checkbox" id="outstanding-toggle" checked onchange="filterOutstanding()">
+                                <span class="slider"></span>
+                            </label>
+                            <span>Outstanding Only</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="scroll-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable(0)">Invoice # <i class="fa-solid fa-sort"></i></th>
+                                <th onclick="sortTable(1)">Patient <i class="fa-solid fa-sort"></i></th>
+                                <th onclick="sortTable(2)">Date <i class="fa-solid fa-sort"></i></th>
+                                <th onclick="sortTable(3)">Amount <i class="fa-solid fa-sort"></i></th>
+                                <th>Insurance</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="billing-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+        <nav class="sidebar-right">
+            <a href="index.html" class="nav-btn">
+                <i class="fa-regular fa-calendar-check"></i>
+                Appointments
+            </a>
+            <a href="billing.html" class="nav-btn active">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+                Billing
+            </a>
+            <a href="patients.html" class="nav-btn">
+                <i class="fa-solid fa-users"></i>
+                Patients
+            </a>
+            <a href="rooms.html" class="nav-btn">
+                <i class="fa-solid fa-door-open"></i>
+                Rooms
+            </a>
+        </nav>
+
+    </div>
+
+</body>
+</html>

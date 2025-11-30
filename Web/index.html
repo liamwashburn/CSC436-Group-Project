@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Doctors Office</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="success-toast" class="toast-container">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Successful</span>
+    </div>
+    <div class="layout-wrapper">
+        <main class="content-area">
+            <h1>Today's Appointments</h1>
+            <div class="main-card">
+                <div class="controls-header">
+                    <input type="text" class="search-input" placeholder="Search patient name...">
+                    <div style="color: var(--text-muted);" id="current-date"></div>
+                </div>
+                <div class="scroll-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Patient</th>
+                                <th>Reason</th>
+                                <th>Room</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointments-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+        <nav class="sidebar-right">
+            <a href="index.html" class="nav-btn active">
+                <i class="fa-regular fa-calendar-check"></i>
+                Appointments
+            </a>
+            <a href="billing.html" class="nav-btn">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+                Billing
+            </a>
+            <a href="patients.html" class="nav-btn">
+                <i class="fa-solid fa-users"></i>
+                Patients
+            </a>
+            <a href="rooms.html" class="nav-btn">
+                <i class="fa-solid fa-door-open"></i>
+                Rooms
+            </a>
+        </nav>
+
+    </div>
+    <script src="scripts.js"></script>
+    <script>
+        async function loadAppointments() {
+        const tbody = document.getElementById('appointments-tbody');
+        tbody.innerHTML = '';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);">Loading...</td></tr>';
+        try {
+            const response = await fetch('http://127.0.0.1:8000/Appointments/');
+            console.log(response);
+            const data = await response.json();
+            const appointments = data.appointments;
+            tbody.innerHTML = appointments.map(appointment => `
+                <tr>
+                    <td>${new Date(appointment.appTime).toLocaleString('en-US', {timeStyle: 'short' })}</td>
+                    <td><strong>${appointment.pFullName}</strong></td>
+                    <td>${appointment.appReason}</td>
+                    <td>${appointment.rID}</td>
+                    <td>
+                        <div class="btn-action-group">
+                            <button class="btn btn-outline" onclick="deleteAppointment('${appointment.appID}')">Delete</button>
+                            <button class="btn btn-primary" onclick="resolveAppointment('Patient #${appointment.pID}', '${appointment.appID}')">Resolve</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);">Error</td></tr>';
+        }
+    }
+
+        async function deleteAppointment(appointmentID) {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/DeleteAppointment/${appointmentID}`, {
+                    method: 'DELETE'
+                });
+                console.log(response);
+                if (response.ok) {
+                    console.log(response);
+                    showToast('Appointment deleted successfully.');
+                    loadAppointments();
+                } else {
+                    showToast('Failed to delete appointment.');
+                }
+            } catch (error) {
+                showToast('Error deleting appointment.');
+            }
+        }
+
+        function resolveAppointment(patientName, appointmentID) {
+            window.location.href = `resolve.html?patient=${encodeURIComponent(patientName)}&appointmentID=${encodeURIComponent(appointmentID)}`;
+        }
+        
+
+
+        // Set current date
+        const currentDateElem = document.getElementById('current-date');
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        const today = new Date();
+        currentDateElem.textContent = today.toLocaleDateString(undefined, options);
+
+        // Initial load 
+    loadAppointments();
+    </script>
+
+</body>
+</html>
