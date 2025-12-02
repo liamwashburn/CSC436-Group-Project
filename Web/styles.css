@@ -425,9 +425,6 @@ td.actions-cell {
     border-radius: 5px;
 }
 
-/* ============================
-   BULB STYLE (Matches Image)
-============================ */
 .bulb {
     width: 32px;
     height: 44px;
@@ -458,7 +455,7 @@ td.actions-cell {
 
 /* Swing animation */
 @keyframes swing {
-    0% { transform: rotate(9deg); }
+    0% { transform: rotate(deg); }
     50% { transform: rotate(1deg); }
     100% { transform: rotate(9eg); }
 }
