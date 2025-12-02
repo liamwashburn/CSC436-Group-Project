@@ -8,8 +8,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+
 </head>
 <body>
+    <img src="https://pub-186bdf6af3664983b6d8055f39e932e8.r2.dev/dino.png" class="dino" alt="Dino">
+    <div class="light-strand" id="strand"></div>
     <div id="success-toast" class="toast-container">
         <i class="fa-solid fa-circle-check"></i>
         <span>Successful</span>
@@ -59,8 +62,8 @@
         </nav>
 
     </div>
-    <script src="scripts.js"></script>
-    <script>
+        <script src="script.js"></script>
+        <script>
         function showToast(message) {
         const toast = document.getElementById('success-toast');
         if (toast) {

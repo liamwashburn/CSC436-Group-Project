@@ -65,7 +65,8 @@
 </head>
 
 <body>
-
+    <img src="https://pub-186bdf6af3664983b6d8055f39e932e8.r2.dev/dino.png" class="dino" alt="Dino">
+    <div class="light-strand" id="strand"></div>
     <div id="success-toast" class="toast-container">
         <i class="fa-solid fa-circle-check"></i>
         <span>Reservation Submitted Successfully!</span>
@@ -156,7 +157,7 @@
 
     </div>
 
-<script src="scripts.js"></script>
+<script src="script.js"></script>
 
 <script>
 
@@ -216,7 +217,7 @@ async function loadPatients() {
 }
 
 async function loadDoctors() {
-    return (await (await fetch("http://127.0.0.1:8000/doctors/list")).json()).doctors;
+    return (await (await fetch("http://127.0.0.1:8000/doctorslist")).json()).doctors;
 }
 
 setupAutocomplete("patient-input", "patient-list", loadPatients);
@@ -237,12 +238,19 @@ async function submitReservation() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
     });
-
-    if (res.ok) {
+    const result = await res.json();
+    if (res.ok && result.status !== "error") {
         showToast("Reservation submitted successfully!");
         setTimeout(() => window.location.href = "rooms.html", 1500);
+    } else if (result.status === "error" && result.message) {
+        const toast = document.getElementById('success-toast');
+        if (toast) {
+            toast.style.backgroundColor = "red";
+            showToast(`Error: ${result.message}`);
+        }
     } else {
         alert("Error submitting reservation.");
+        setTimeout(() => window.location.href = "rooms.html", 1500);
     }
 }
 

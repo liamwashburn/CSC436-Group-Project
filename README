@@ -1,9 +1,9 @@
 -- CREATE/ACTIVATE VIRTUAL ENVIRONMENT
 python -m venv venv
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-.\venv\Scripts\Activate.ps1
+.\venv\Scripts\Activate.ps1   <-- Activates the virtual environment in PowerShell   
 
 
 -- START SERVER http://127.0.0.1:8000/docs
 pip install -r requirements.txt
-uvicorn fetches:app --reload --host 127.0.0.1 --port 8000
+uvicorn fetches:app --reload --host 127.0.0.1 --port 8000 <-- Starts the FastAPI server with auto-reload on code changes

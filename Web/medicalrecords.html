@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
+<img src="https://pub-186bdf6af3664983b6d8055f39e932e8.r2.dev/dino.png" class="dino" alt="Dino">
+<div class="light-strand" id="strand"></div>
 <div class="layout-wrapper">
     <main class="content-area">
 
@@ -59,15 +60,13 @@
         </a>
     </nav>
 </div>
-
+<script src="script.js"></script>
 <script>
-/* --- GET pID FROM URL --- */
 function getPID() {
     const params = new URLSearchParams(window.location.search);
     return params.get("pID");
 }
 
-/* --- LOAD MEDICAL RECORDS --- */
 async function loadMedicalRecords() {
     const pID = getPID();
     if (!pID) return;
@@ -136,7 +135,6 @@ function renderRecords(records) {
 
 let openNotesID = null;
 
-/* --- EXPAND / COLLAPSE NOTES --- */
 function toggleNotes(appID) {
     const newRow = document.getElementById(`notes-${appID}`);
 

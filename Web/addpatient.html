@@ -58,6 +58,8 @@
 </head>
 
 <body>
+    <img src="https://pub-186bdf6af3664983b6d8055f39e932e8.r2.dev/dino.png" class="dino" alt="Dino">
+    <div class="light-strand" id="strand"></div>
     <div id="success-toast" class="toast-container">
         <i class="fa-solid fa-circle-check"></i>
         <span>Action Completed Successfully!</span>
@@ -160,11 +162,11 @@
     </div>
 
 
-<script src="scripts.js"></script>
+<script src="script.js"></script>
 
 <script>
 
-            function showToast(message) {
+function showToast(message) {
         const toast = document.getElementById('success-toast');
         if (toast) {
             toast.querySelector('span').innerText = message;

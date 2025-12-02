@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
+    <img src="https://pub-186bdf6af3664983b6d8055f39e932e8.r2.dev/dino.png" class="dino" alt="Dino">
+    <div class="light-strand" id="strand"></div>
     <!-- SUCCESS TOAST -->
     <div id="success-toast" class="toast-container">
         <i class="fa-solid fa-circle-check"></i>
@@ -33,7 +34,7 @@
 
                         <div class="toggle-container">
                             <label class="switch">
-                                <input type="checkbox" id="outstanding-toggle" checked onchange="loadBilling()">
+                                <input type="checkbox" id="outstanding-toggle"  checked onchange="loadBilling()">
                                 <span class="slider"></span>
                             </label>
                             <span>Outstanding Only</span>
@@ -47,8 +48,8 @@
                         <thead>
                             <tr>
                                 <th>Patient</th>
-                                <th>Amount</th>
-                                <th>Frozen</th>
+                                <th>Balance</th>
+                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -76,7 +77,7 @@
         </nav>
 
     </div>
-
+<script src="script.js"></script>
 <script>
 
 function showToast(message) {
@@ -114,7 +115,9 @@ function renderBillingTable(billings) {
         const tr = document.createElement("tr");
 
         const frozenStatus = bill.frozen === 1
-            ? `<span style="color:#991b1b; font-weight:600;">Frozen</span>`
+            ? `<span style="color:#036bfc; font-weight:600; border: 1px solid #036bfc; padding: 2px 6px; border-radius: 4px;">
+                <i class="fa-solid fa-snowflake"></i> Frozen
+               </span>`
             : `<span style="color:#166534; font-weight:600;">Active</span>`;
 
         const payButton = bill.bCost > 0

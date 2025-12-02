@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <img src="https://pub-186bdf6af3664983b6d8055f39e932e8.r2.dev/dino.png" class="dino" alt="Dino">
+    <div class="light-strand" id="strand"></div>
 
     <div id="success-toast" class="toast-container">
         <i class="fa-solid fa-circle-check"></i>
@@ -58,7 +60,7 @@
         </nav>
     </div>
 
-    <script src="scripts.js"></script>
+    <script src="script.js"></script>
 
   <script>
     const timeSlots = [
@@ -79,53 +81,49 @@
 }
 
     // Build timeline
-    function renderRoomTimeline(rooms) {
-        const container = document.getElementById("timeline-container");
-        let html = "";
+   function renderRoomTimeline(roomMap) {
+    const container = document.getElementById("timeline-container");
+    let html = "";
 
-        // Determine if date is today + current hour for greying out
-        const selectedDate = document.getElementById("date-selector").value;
-        const todayDate = new Date().toISOString().split("T")[0];
+    const selectedDate = document.getElementById("date-selector").value;
+    const todayDate = new Date().toISOString().split("T")[0];
 
-        let currentHour = null;
-        if (selectedDate === todayDate) {
-            const now = new Date();
-            currentHour = now.getHours(); // numeric 24h
-        }
-
-        html += "<div></div>";
-        timeSlots.forEach(t => html += `<div class='time-header'>${t}</div>`);
-
-        rooms.forEach(room => {
-            html += `<div class="room-row-label">Room ${room.roomNumber}</div>`;
-
-            timeSlots.forEach(slot => {
-                const isBooked = slot === room.TimeSlot;
-                const slotHour = parseInt(slot.split(":")[0]);
-
-                // Check if this slot is in the past
-                const isPast = currentHour !== null && slotHour < currentHour;
-
-                if (isBooked) {
-                    html += `
-                        <div class="time-slot occupied">
-                            <div class="slot-name">${room.pName}</div>
-                            <div class="slot-reason">${slot} - ${addOneHour(slot)}</div>
-                        </div>
-                    `;
-                } else {
-                    html += `
-                        <div class="time-slot empty ${isPast ? "past" : ""}"
-                             ${!isPast ? `onclick="bookSlot('${room.roomNumber}', '${slot}')"` : ""}>
-                        </div>
-                    `;
-                }
-            });
-        });
-
-        container.innerHTML = html;
+    let currentHour = null;
+    if (selectedDate === todayDate) {
+        const now = new Date();
+        currentHour = now.getHours();
     }
 
+    html += "<div></div>";
+    timeSlots.forEach(t => html += `<div class='time-header'>${t}</div>`);
+
+    Object.keys(roomMap).forEach(roomNumber => {
+        html += `<div class="room-row-label">Room ${roomNumber}</div>`;
+
+        timeSlots.forEach(slot => {
+            const pName = roomMap[roomNumber][slot] || null;
+            const slotHour = parseInt(slot.split(":")[0]);
+            const isPast = currentHour !== null && slotHour < currentHour;
+
+            if (pName) {
+                html += `
+                    <div class="time-slot occupied">
+                        <div class="slot-name">${pName}</div>
+                        <div class="slot-reason">${slot} - ${addOneHour(slot)}</div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="time-slot empty ${isPast ? "past" : ""}"
+                         ${!isPast ? `onclick="bookSlot('${roomNumber}', '${slot}')"` : ""}>
+                    </div>
+                `;
+            }
+        });
+    });
+
+    container.innerHTML = html;
+}
     function addOneHour(time) {
         const [h, m] = time.split(":").map(Number);
         return `${String(h+1).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
@@ -136,41 +134,39 @@
         window.location.href = `reserve.html?room=${roomNumber}&time=${timeSlot}&date=${date}`;
     }
 
-    async function loadRoomData() {
-        const container = document.getElementById("timeline-container");
-        container.innerHTML = '<div class="loading"><span class="spinner"></span>Loading...</div>';
+async function loadRoomData() {
+    const container = document.getElementById("timeline-container");
+    container.innerHTML = '<div class="loading"><span class="spinner"></span>Loading...</div>';
 
-        const selectedDate = document.getElementById("date-selector").value;
-        const fileName = `rooms-${selectedDate}.json`;
+    const selectedDate = document.getElementById("date-selector").value;
 
-        try {
-            const response = await fetch(`http://127.0.0.1:8000/rooms/${selectedDate}`);
-
-            if (!response.ok) {
-                renderRoomTimeline(defaultRooms);
-                return;
-            }
-
-            const data = await response.json();
-
-            const mergedRooms = defaultRooms.map(def => {
-                const match = data.rooms?.find(r => r.rType === def.roomNumber);
-
-                if (!match) return def;
-
-                return {
-                    roomNumber: match.rType,
-                    TimeSlot: extractTime(match.appTime),
-                    pName: match.pFullName
-                };
-            });
-
-            renderRoomTimeline(mergedRooms);
-
-        } catch (err) {
-            renderRoomTimeline(defaultRooms);
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/rooms/${selectedDate}`);
+        if (!response.ok) {
+            renderRoomTimeline([]);
+            return;
         }
+
+        const data = await response.json();
+
+        // Build a map: roomNumber -> { slot -> appointment }
+        const roomMap = {};
+        defaultRooms.forEach(def => {
+            roomMap[def.roomNumber] = {};
+        });
+
+        data.rooms.forEach(r => {
+            const slot = extractTime(r.appTime);
+            if (!roomMap[r.rType]) roomMap[r.rType] = {};
+            roomMap[r.rType][slot] = r.pFullName;
+        });
+
+        renderRoomTimeline(roomMap);
+
+    } catch (err) {
+        renderRoomTimeline({});
     }
+}
 
     document.addEventListener("DOMContentLoaded", () => {
         const today = new Date().toISOString().split("T")[0];

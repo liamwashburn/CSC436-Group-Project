@@ -25,6 +25,7 @@ def get_db_connection():
     )
     return conn
 
+# Fetch to get Patient by ID
 @app.get("/patients/{pID}")
 def get_patient_by_id(pID: int):
     conn = get_db_connection()
@@ -253,41 +254,35 @@ async def update_patient(request: Request):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    try:
-        # Update Patients table
+    # Update Patients table
+    cursor.execute("""
+        UPDATE Patients 
+        SET pFullName = %s, pDob = %s, pPhone = %s, pEmail = %s, pAddress = %s
+        WHERE pID = %s
+    """, (pFullName, pDob, pPhone, pEmail, pAddress, pID))
+
+    # Check insurance exists
+    cursor.execute("SELECT pID FROM PatientInsurance WHERE pID = %s", (pID,))
+    exists = cursor.fetchone()
+
+    if exists:
         cursor.execute("""
-            UPDATE Patients 
-            SET pFullName = %s, pDob = %s, pPhone = %s, pEmail = %s, pAddress = %s
+            UPDATE PatientInsurance
+            SET providerName = %s, hasInsurance = %s
             WHERE pID = %s
-        """, (pFullName, pDob, pPhone, pEmail, pAddress, pID))
+        """, (providerName, providerName != "None", pID))
+    else:
+        cursor.execute("""
+            INSERT INTO PatientInsurance (pID, providerName, hasInsurance)
+            VALUES (%s, %s, %s)
+        """, (pID, providerName, providerName != "None"))
 
-        # Check if insurance exists
-        cursor.execute("SELECT pID FROM PatientInsurance WHERE pID = %s", (pID,))
-        exists = cursor.fetchone()
+    conn.commit()
 
-        if exists:
-            cursor.execute("""
-                UPDATE PatientInsurance
-                SET providerName = %s, hasInsurance = %s
-                WHERE pID = %s
-            """, (providerName, providerName != "None", pID))
-        else:
-            cursor.execute("""
-                INSERT INTO PatientInsurance (pID, providerName, hasInsurance)
-                VALUES (%s, %s, %s)
-            """, (pID, providerName, providerName != "None"))
+    cursor.close()
+    conn.close()
 
-        conn.commit()
-        return {"status": "success", "message": "Patient updated successfully"}
-
-    except Exception as e:
-        conn.rollback()
-        print("UPDATE ERROR:", e)  # helpful for debugging
-        raise HTTPException(status_code=500, detail=str(e))
-
-    finally:
-        cursor.close()
-        conn.close()
+    return {"status": "success", "message": "Patient updated successfully"}
 
 # Return T/F to Check for Insurance
 @app.get("/hasInsurance/{pID}")
@@ -365,7 +360,7 @@ async def list_patients():
 # -----------------------------------------
 # 2) GET DOCTOR LIST FOR AUTOCOMPLETE
 # -----------------------------------------
-@app.get("/doctors/list")
+@app.get("/doctorslist")
 async def list_doctors():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -405,50 +400,65 @@ async def reserve_room(request: Request):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    try:
-        # Get pID
-        cursor.execute("SELECT pID FROM Patients WHERE pFullName = %s", (patient_name,))
-        p = cursor.fetchone()
-        if not p:
-            return {"status": "error", "message": "Patient not found"}
-        pID = p[0]
-
-        # Get dID
-        cursor.execute("SELECT dID FROM Doctor WHERE docName = %s", (doctor_name,))
-        d = cursor.fetchone()
-        if not d:
-            return {"status": "error", "message": "Doctor not found"}
-        dID = d[0]
-
-        # Ensure room is not already booked
-        cursor.execute("""SELECT appID FROM Appointments WHERE appTime = %s AND rID = %s""", (full_time, rID))
-        if cursor.fetchone():
-            return {"status": "error", "message": "Room already booked at this time"}
-
-        # Ensure billing record exists
-        cursor.execute("SELECT bID FROM Billing WHERE pID = %s", (pID,))
-        billing = cursor.fetchone()
-
-        if billing:
-            bID = billing[0]
-        else:
-            cursor.execute("""INSERT INTO Billing (bCost, frozen, pID, Paid) VALUES (0, FALSE, %s, FALSE)""", (pID,))
-            bID = cursor.lastrowid
-
-        # Create appointment
-        cursor.execute("""
-            INSERT INTO Appointments (appTime, appReason, appType, pID, dID, rID, bID) VALUES (%s, %s, 'General', %s, %s, %s, %s)""", (full_time, reason, pID, dID, rID, bID))
-        conn.commit()
-
-        return {"status": "success", "message": "Reservation completed"}
-
-    except Exception as e:
-        conn.rollback()
-        return {"status": "error", "message": str(e)}
-
-    finally:
+    # Get pID
+    cursor.execute("SELECT pID FROM Patients WHERE pFullName = %s", (patient_name,))
+    p = cursor.fetchone()
+    if not p:
         cursor.close()
         conn.close()
+        return {"status": "error", "message": "Patient not found"}
+    pID = p[0]
+
+    # Get dID
+    cursor.execute("SELECT dID FROM Doctor WHERE docName = %s", (doctor_name,))
+    d = cursor.fetchone()
+    if not d:
+        cursor.close()
+        conn.close()
+        return {"status": "error", "message": "Doctor not found"}
+    dID = d[0]
+
+    # Ensure room not already booked
+    cursor.execute(
+        "SELECT appID FROM Appointments WHERE appTime = %s AND rID = %s",
+        (full_time, rID)
+    )
+    if cursor.fetchone():
+        cursor.close()
+        conn.close()
+        return {"status": "error", "message": "Room already booked at this time"}
+
+    # Ensure billing record exists
+    cursor.execute("SELECT bID, bCost FROM Billing WHERE pID = %s", (pID,))
+    billing = cursor.fetchone()
+
+    if billing:
+        bID, bCost = billing
+        if bCost >= 150:
+                cursor.close()
+                conn.close()
+                print("ACCOUNT FROZEN DUE TO OUTSTANDING BALANCE")
+                return {"status": "error", "message": "Account frozen due to outstanding balance"}
+    else:
+        cursor.execute(
+            "INSERT INTO Billing (bCost, frozen, pID, Paid) VALUES (0, FALSE, %s, FALSE)",
+            (pID,)
+        )
+        bID = cursor.lastrowid
+
+    cursor.execute("""
+        INSERT INTO Appointments 
+        (appTime, appReason, appType, pID, dID, rID, bID)
+        VALUES (%s, %s, 'General', %s, %s, %s, %s)
+    """, (full_time, reason, pID, dID, rID, bID))
+    print("execute")
+
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    return {"status": "success", "message": "Reservation completed"}
 
 @app.get("/patients/{pID}")
 async def get_patient_by_id(pID: int):
@@ -479,23 +489,20 @@ async def get_appointment_details(appID: int):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    try:
-        cursor.execute("""
-            SELECT 
-                a.appID,
-                a.pID,
-                a.dID,
-                a.rID,
-                a.appTime,
-                a.appReason,
-                a.appCompleted,
-
-                p.pFullName,
-                p.pPhone,
-                p.pEmail,
-
-                d.docName,
-                d.docType
+    cursor.execute("""
+        SELECT 
+            a.appID,
+            a.pID,
+            a.dID,
+            a.rID,                
+            a.appTime,
+            a.appReason,
+            a.appCompleted,
+            p.pFullName,
+            p.pPhone,
+            p.pEmail,
+            d.docName,
+            d.docType
 
             FROM Appointments a
             JOIN Patients p ON a.pID = p.pID
@@ -504,13 +511,12 @@ async def get_appointment_details(appID: int):
             WHERE a.appID = %s
         """, (appID,))
 
-        row = cursor.fetchone()
+    row = cursor.fetchone()
 
-        if not row:
-            return {"error": "Appointment not found"}
+    cursor.close()
+    conn.close()
 
-        return {"appointment": row}
+    if not row:
+        return {"error": "Appointment not found"}
 
-    finally:
-        cursor.close()
-        conn.close()
+    return {"appointment": row}
