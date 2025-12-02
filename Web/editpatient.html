@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Patient</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 14px;
+            border-left: 5px solid var(--primary);
+            padding-left: 10px;
+        }
+
+        .form-card {
+            background: rgba(255,255,255,0.55);
+            padding: 25px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .full {
+            grid-column: 1 / 3;
+        }
+
+        .main-card {
+            padding: 30px; 
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; 
+        }
+
+        .form-card {
+            margin-bottom: 30px;
+        }
+
+        .content-area {
+            padding-bottom: 40px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TOAST -->
+    <div id="success-toast" class="toast-container">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Patient Updated Successfully!</span>
+    </div>
+
+    <div class="layout-wrapper">
+        
+        <main class="content-area">
+
+            <h1>Edit Patient: <span id="patient-name-header" style="color: var(--primary);">Loading...</span></h1>
+
+            <div class="main-card">
+
+                <form id="edit-patient-form">
+
+                    <!-- PATIENT DETAILS -->
+                    <h3 class="section-title">Patient Details</h3>
+
+                    <div class="form-card form-grid-2">
+
+                        <div class="form-group full">
+                            <label>Full Name</label>
+                            <input type="text" id="pFullName" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            <input type="date" id="pDob" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Insurance Provider</label>
+                            <select id="providerName" class="form-control">
+                                <option value="None">None</option>
+                                <option value="Aetna">Aetna</option>
+                                <option value="Blue Cross">Blue Cross</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <!-- CONTACT -->
+                    <h3 class="section-title">Contact Information</h3>
+
+                    <div class="form-card form-grid-2">
+
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" id="pPhone" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="pEmail" class="form-control" required>
+                        </div>
+
+                        <div class="form-group full">
+                            <label>Address</label>
+                            <textarea id="pAddress" class="form-control" required></textarea>
+                        </div>
+
+                    </div>
+
+                    <!-- BUTTONS -->
+                    <div style="margin-top: 20px; display: flex; gap: 12px;">
+                        <button type="submit" class="btn btn-primary" style="padding: 12px 24px;">Save Changes</button>
+                        <button type="button" class="btn btn-outline" style="padding: 12px 24px;" onclick="cancelEdit()">Cancel</button>
+                    </div>
+
+                </form>
+
+            </div>
+
+        </main>
+
+        <!-- Sidebar -->
+        <nav class="sidebar-right">
+            <a href="index.html" class="nav-btn">
+                <i class="fa-regular fa-calendar-check"></i> Appointments
+            </a>
+            <a href="billing.html" class="nav-btn">
+                <i class="fa-solid fa-file-invoice-dollar"></i> Billing
+            </a>
+            <a href="patients.html" class="nav-btn active">
+                <i class="fa-solid fa-users"></i> Patients
+            </a>
+            <a href="rooms.html" class="nav-btn">
+                <i class="fa-solid fa-door-open"></i> Rooms
+            </a>
+        </nav>
+
+    </div>
+
+
+<script>
+function showToast(message) {
+    const toast = document.getElementById('success-toast');
+    toast.querySelector('span').innerText = message;
+    toast.classList.add('show');
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 2500);
+}
+
+const params = new URLSearchParams(window.location.search);
+const pID = params.get("pID");
+
+// Load patient & fill fields
+async function loadPatient() {
+    try {
+        const res = await fetch(`http://127.0.0.1:8000/patients/${pID}`);
+        const data = await res.json();
+
+        let patientData = data.patients.find(p => p.pID == pID);
+
+        if (!patientData) {
+            console.error("Patient not found.");
+            return;
+        }
+
+        // Fill fields
+        document.getElementById("patient-name-header").innerText = patientData.pFullName;
+        document.getElementById("pFullName").value = patientData.pFullName;
+        document.getElementById("pDob").value = patientData.pDob;
+        document.getElementById("pPhone").value = patientData.pPhone;
+        document.getElementById("pEmail").value = patientData.pEmail;
+        document.getElementById("pAddress").value = patientData.pAddress;
+
+        // FIX: providerName instead of providerName
+        document.getElementById("providerName").value = patientData.providerName || "None";
+
+    } catch (error) {
+        console.error("Failed to load patient:", error);
+    }
+}
+
+loadPatient();
+
+
+// Save changes
+document.getElementById("edit-patient-form").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const payload = {
+        pID: pID,
+        pFullName: document.getElementById("pFullName").value,
+        pDob: document.getElementById("pDob").value,
+        pPhone: document.getElementById("pPhone").value,
+        pEmail: document.getElementById("pEmail").value,
+        pAddress: document.getElementById("pAddress").value,
+        providerName: document.getElementById("providerName").value
+    };
+
+    try {
+        const res = await fetch("http://127.0.0.1:8000/patient/update", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            showToast("Patient updated!");
+            setTimeout(() => {
+                window.location.href = "patients.html";
+            }, 1500);
+        } else {
+            alert("Failed to update patient.");
+        }
+    } catch (error) {
+        console.error("Error updating:", error);
+    }
+});
+
+function cancelEdit() {
+    window.location.href = "patients.html";
+}
+</script>
+
+</body>
+</html>

@@ -3,72 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Doctors Office</title>
-    
+    <title>Billing</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+    <!-- SUCCESS TOAST -->
     <div id="success-toast" class="toast-container">
         <i class="fa-solid fa-circle-check"></i>
-        <span>Successfull</span>
+        <span>Success</span>
     </div>
+
     <div class="layout-wrapper">
+
         <main class="content-area">
             <h1>Billing</h1>
+
             <div class="main-card">
+
+                <!-- Controls -->
                 <div class="controls-header">
                     <div style="display: flex; gap: 20px; align-items: center;">
-                        <input type="text" class="search-input" placeholder="Search invoice...">
+                        <input type="text" id="search-input" class="search-input"
+                               placeholder="Search patient..."
+                               oninput="filterTable()">
+
                         <div class="toggle-container">
                             <label class="switch">
-                                <input type="checkbox" id="outstanding-toggle" checked onchange="filterOutstanding()">
+                                <input type="checkbox" id="outstanding-toggle" checked onchange="loadBilling()">
                                 <span class="slider"></span>
                             </label>
                             <span>Outstanding Only</span>
                         </div>
                     </div>
                 </div>
+
+                <!-- Table -->
                 <div class="scroll-wrapper">
                     <table>
                         <thead>
                             <tr>
-                                <th onclick="sortTable(0)">Invoice # <i class="fa-solid fa-sort"></i></th>
-                                <th onclick="sortTable(1)">Patient <i class="fa-solid fa-sort"></i></th>
-                                <th onclick="sortTable(2)">Date <i class="fa-solid fa-sort"></i></th>
-                                <th onclick="sortTable(3)">Amount <i class="fa-solid fa-sort"></i></th>
-                                <th>Insurance</th>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>Patient</th>
+                                <th>Amount</th>
+                                <th>Frozen</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="billing-tbody">
-                        </tbody>
+                        <tbody id="billing-tbody"></tbody>
                     </table>
                 </div>
+
             </div>
         </main>
+
+        <!-- SIDEBAR -->
         <nav class="sidebar-right">
             <a href="index.html" class="nav-btn">
-                <i class="fa-regular fa-calendar-check"></i>
-                Appointments
+                <i class="fa-regular fa-calendar-check"></i> Appointments
             </a>
             <a href="billing.html" class="nav-btn active">
-                <i class="fa-solid fa-file-invoice-dollar"></i>
-                Billing
+                <i class="fa-solid fa-file-invoice-dollar"></i> Billing
             </a>
             <a href="patients.html" class="nav-btn">
-                <i class="fa-solid fa-users"></i>
-                Patients
+                <i class="fa-solid fa-users"></i> Patients
             </a>
             <a href="rooms.html" class="nav-btn">
-                <i class="fa-solid fa-door-open"></i>
-                Rooms
+                <i class="fa-solid fa-door-open"></i> Rooms
             </a>
         </nav>
 
     </div>
+
+<script>
+
+function showToast(message) {
+    const toast = document.getElementById('success-toast');
+    toast.querySelector('span').innerText = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+async function loadBilling() {
+    const tbody = document.getElementById("billing-tbody");
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">Loading...</td></tr>`;
+
+    const outstanding = document.getElementById("outstanding-toggle").checked;
+
+    const url = outstanding
+        ? "http://127.0.0.1:8000/billing/outstanding"
+        : "http://127.0.0.1:8000/billing/";
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        renderBillingTable(data.billings);
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Error loading billing</td></tr>`;
+    }
+}
+
+function renderBillingTable(billings) {
+    const tbody = document.getElementById("billing-tbody");
+    tbody.innerHTML = "";
+
+    billings.forEach(bill => {
+        const tr = document.createElement("tr");
+
+        const frozenStatus = bill.frozen === 1
+            ? `<span style="color:#991b1b; font-weight:600;">Frozen</span>`
+            : `<span style="color:#166534; font-weight:600;">Active</span>`;
+
+        const payButton = bill.bCost > 0
+            ? `<button class="btn btn-primary" onclick="payBill(${bill.pID})">Pay</button>`
+            : `<button class="btn btn-outline" disabled>Paid</button>`;
+
+        tr.innerHTML = `
+            <td><strong>${bill.pFullName}</strong></td>
+            <td>$${bill.bCost.toFixed(2)}</td>
+            <td>${frozenStatus}</td>
+            <td class="actions-cell">
+                ${payButton}
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+
+    filterTable();
+}
+
+async function payBill(pID) {
+    await fetch(`http://127.0.0.1:8000/paybill/${pID}`, {
+        method: "POST"
+    });
+
+    showToast("Payment processed");
+    loadBilling();
+}
+
+function filterTable() {
+    const query = document.getElementById("search-input").value.toLowerCase();
+    const rows = document.querySelectorAll("#billing-tbody tr");
+
+    rows.forEach(row => {
+        const name = row.querySelector("td").innerText.toLowerCase();
+        row.style.display = name.includes(query) ? "" : "none";
+    });
+}
+
+document.addEventListener("DOMContentLoaded", loadBilling);
+
+</script>
 
 </body>
 </html>

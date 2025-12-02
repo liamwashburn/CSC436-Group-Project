@@ -20,7 +20,7 @@
             <div class="main-card">
                 <div class="controls-header">
                     <input type="text" class="search-input" placeholder="Search patient name...">
-                    <div style="color: var(--text-muted);" id="current-date"></div>
+                    <div class="btn btn-primary" onclick="book()">Book Appointment</div>
                 </div>
                 <div class="scroll-wrapper">
                     <table>
@@ -61,15 +61,27 @@
     </div>
     <script src="scripts.js"></script>
     <script>
+        function showToast(message) {
+        const toast = document.getElementById('success-toast');
+        if (toast) {
+            toast.querySelector('span').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        }
         async function loadAppointments() {
         const tbody = document.getElementById('appointments-tbody');
         tbody.innerHTML = '';
         tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);">Loading...</td></tr>';
         try {
             const response = await fetch('http://127.0.0.1:8000/Appointments/');
+            //const response = await fetch('./appointment.json');
             console.log(response);
             const data = await response.json();
             const appointments = data.appointments;
+            
             tbody.innerHTML = appointments.map(appointment => `
                 <tr>
                     <td>${new Date(appointment.appTime).toLocaleString('en-US', {timeStyle: 'short' })}</td>
@@ -108,16 +120,13 @@
         }
 
         function resolveAppointment(patientName, appointmentID) {
-            window.location.href = `resolve.html?patient=${encodeURIComponent(patientName)}&appointmentID=${encodeURIComponent(appointmentID)}`;
+            window.location.href = `./resolve.html?appID=${appointmentID}`;
         }
         
 
-
-        // Set current date
-        const currentDateElem = document.getElementById('current-date');
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        const today = new Date();
-        currentDateElem.textContent = today.toLocaleDateString(undefined, options);
+        function book() {
+            window.location.href = 'rooms.html';
+        }
 
         // Initial load 
     loadAppointments();

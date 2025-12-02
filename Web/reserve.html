@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserve Room</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 14px;
+            border-left: 5px solid var(--primary);
+            padding-left: 10px;
+        }
+
+        .form-card {
+            background: rgba(255,255,255,0.5);
+            padding: 20px 24px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .autocomplete-list {
+            position: absolute;
+            width: 300px;
+            background: var(--bg-body);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            margin-top: 4px;
+            max-height: 180px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .autocomplete-item {
+            padding: 12px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover {
+            background: var(--slot-hover);
+        }
+
+        .form-group label {
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="success-toast" class="toast-container">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Reservation Submitted Successfully!</span>
+    </div>
+
+    <div class="layout-wrapper">
+
+        <main class="content-area">
+
+            <h1 id="reserve-header">
+                Reserve Room
+            </h1>
+
+            <div class="main-card">
+                <div class="resolve-grid">
+
+                    <!-- LEFT SIDE FORM -->
+                    <div style="border-right: 1px solid var(--border); padding-right: 30px;">
+
+                        <h3 class="section-title">Reservation Information</h3>
+
+                        <div class="form-card">
+                            <div class="form-group">
+                                <label>Patient</label>
+                                <input type="text" id="patient-input" class="form-control" autocomplete="off">
+                                <div id="patient-list" class="autocomplete-list"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Doctor</label>
+                                <input type="text" id="doctor-input" class="form-control" autocomplete="off">
+                                <div id="doctor-list" class="autocomplete-list"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Reason for Visit</label>
+                                <textarea id="reason-input" class="form-control summary-box" placeholder="Enter reason..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT SIDE SUMMARY -->
+                    <div>
+                        <h3 class="section-title">Summary</h3>
+
+                        <div class="form-card">
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="text" id="date-display" class="form-control" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Time</label>
+                                <input type="text" id="time-display" class="form-control" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Room</label>
+                                <input type="text" id="room-display" class="form-control" readonly>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 20px; display: flex; gap: 10px; flex-direction: column;">
+                            <button class="btn btn-primary" style="padding: 15px;" onclick="submitReservation()">Submit Reservation</button>
+                            <button class="btn btn-outline" onclick="cancelReservation()">Cancel</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+
+        <!-- SIDEBAR -->
+        <nav class="sidebar-right">
+            <a href="index.html" class="nav-btn">
+                <i class="fa-regular fa-calendar-check"></i> Appointments
+            </a>
+            <a href="billing.html" class="nav-btn">
+                <i class="fa-solid fa-file-invoice-dollar"></i> Billing
+            </a>
+            <a href="patients.html" class="nav-btn">
+                <i class="fa-solid fa-users"></i> Patients
+            </a>
+            <a href="rooms.html" class="nav-btn active">
+                <i class="fa-solid fa-door-open"></i> Rooms
+            </a>
+        </nav>
+
+    </div>
+
+<script src="scripts.js"></script>
+
+<script>
+
+    function showToast(message) {
+        const toast = document.getElementById('success-toast');
+        if (toast) {
+            toast.querySelector('span').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+}
+const params = new URLSearchParams(window.location.search);
+const room = params.get("room");
+const time = params.get("time");
+const date = params.get("date");
+
+// Update header
+document.getElementById("reserve-header").innerHTML =
+    `Reserve Room <span style="color: var(--primary);">${room}</span> at <span style="color: var(--primary);">${time}</span> on <span style="color: var(--primary);">${date}</span>`;
+
+// Fill summary
+document.getElementById("room-display").value = room;
+document.getElementById("time-display").value = time;
+document.getElementById("date-display").value = date;
+
+function setupAutocomplete(inputId, listId, fetchFn) {
+    const input = document.getElementById(inputId);
+    const list = document.getElementById(listId);
+
+    input.addEventListener("input", async () => {
+        const value = input.value.toLowerCase();
+        const items = await fetchFn();
+
+        list.innerHTML = "";
+        if (!value.trim()) { list.style.display = "none"; return; }
+
+        const filtered = items.filter(x => x.toLowerCase().includes(value));
+        filtered.forEach(name => {
+            const div = document.createElement("div");
+            div.className = "autocomplete-item";
+            div.textContent = name;
+            div.onclick = () => {
+                input.value = name;
+                list.style.display = "none";
+            };
+            list.appendChild(div);
+        });
+
+        list.style.display = filtered.length ? "block" : "none";
+    });
+}
+
+async function loadPatients() {
+    return (await (await fetch("http://127.0.0.1:8000/patientslist/")).json()).patients;
+}
+
+async function loadDoctors() {
+    return (await (await fetch("http://127.0.0.1:8000/doctors/list")).json()).doctors;
+}
+
+setupAutocomplete("patient-input", "patient-list", loadPatients);
+setupAutocomplete("doctor-input", "doctor-list", loadDoctors);
+
+async function submitReservation() {
+    const payload = {
+        patient: document.getElementById("patient-input").value,
+        doctor: document.getElementById("doctor-input").value,
+        reason: document.getElementById("reason-input").value,
+        room: room,
+        time: time,
+        date: date
+    };
+
+    const res = await fetch("http://127.0.0.1:8000/reserve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+        showToast("Reservation submitted successfully!");
+        setTimeout(() => window.location.href = "rooms.html", 1500);
+    } else {
+        alert("Error submitting reservation.");
+    }
+}
+
+function cancelReservation() {
+    window.location.href = "rooms.html";
+
+}
+</script>
+
+</body>
+</html>

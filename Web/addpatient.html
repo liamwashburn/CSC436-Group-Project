@@ -3,12 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Doctors Office</title>
+    <title>Add Patient</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+
+    <style>
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 14px;
+            border-left: 5px solid var(--primary);
+            padding-left: 10px;
+        }
+
+
+        .form-card {
+            background: rgba(255,255,255,0.5);
+            padding: 25px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+
+        .full {
+            grid-column: 1 / 3;
+        }
+.main-card {
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.form-card {
+    margin-bottom: 30px;
+}
+
+.content-area {
+    padding-bottom: 40px;
+}
+
+    </style>
 </head>
+
 <body>
     <div id="success-toast" class="toast-container">
         <i class="fa-solid fa-circle-check"></i>
@@ -16,112 +64,146 @@
     </div>
 
     <div class="layout-wrapper">
+
         <main class="content-area">
+
             <h1>Add Patient</h1>
+
             <div class="main-card">
-                <form id="add-patient-form" action="http://127.0.0.1:8000/patients/create" method="POST">
-                    <div class="form-group">
-                        <label for="pFullName">Full Name</label>
-                        <input type="text" id="pFullName" name="pFullName" class="form-control" placeholder="Enter full name" required>
+
+                <form id="add-patient-form">
+
+                    <!-- PATIENT DETAILS -->
+                    <h3 class="section-title">Patient Details</h3>
+
+                    <div class="form-card form-grid-2">
+
+                        <div class="form-group full">
+                            <label for="pFullName">Full Name</label>
+                            <input type="text" id="pFullName" name="pFullName" class="form-control" placeholder="Enter full name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pDob">Date of Birth</label>
+                            <input type="date" id="pDob" name="pDob" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pSex">Sex</label>
+                            <select id="pSex" name="pSex" class="form-control" required>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
                     </div>
-                    <div class="form-group">
-                        <label for="pDob">Date of Birth</label>
-                        <input type="date" id="pDob" name="pDob" class="form-control" required>
+                    <!-- CONTACT INFORMATION -->
+                    <h3 class="section-title">Contact Information</h3>
+
+                    <div class="form-card form-grid-2">
+
+                        <div class="form-group">
+                            <label for="pPhone">Phone</label>
+                            <input type="tel" id="pPhone" name="pPhone" class="form-control" placeholder="Enter phone number" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pEmail">Email</label>
+                            <input type="email" id="pEmail" name="pEmail" class="form-control" placeholder="Enter email address" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pInsurance">Insurance</label>
+                            <select id="pInsurance" name="pInsurance" class="form-control" required>
+                                <option value="Aetna">Aetna</option>
+                                <option value="Blue Cross">Blue Cross</option>
+                                <option value="">None</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full">
+                            <label for="pAddress">Address</label>
+                            <textarea id="pAddress" name="pAddress" class="form-control" placeholder="Enter address" required></textarea>
+                        </div>
+
                     </div>
-                    <div class="form-group">
-                        <label for="pSex">Sex</label>
-                        <select id="pSex" name="pSex" class="form-control" required>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                        </select>
+
+                    <!-- BUTTONS -->
+                    <div style="margin-top: 20px; display: flex; gap: 12px;">
+                        <button type="submit" class="btn btn-primary" style="padding: 12px 24px;">Add Patient</button>
+                        <button type="reset" class="btn btn-outline" style="padding: 12px 24px;">Reset</button>
                     </div>
-                    <div class="form-group">
-                        <label for="pPhone">Phone</label>
-                        <input type="tel" id="pPhone" name="pPhone" class="form-control" placeholder="Enter phone number" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="pEmail">Email</label>
-                        <input type="email" id="pEmail" name="pEmail" class="form-control" placeholder="Enter email address" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="pInsurance">Insurance</label>
-                        <select id="pInsurance" name="pInsurance" class="form-control" required>
-                            <option value="Aetna">Aetna</option>
-                            <option value="Blue Cross">Blue Cross</option>
-                            <option value="">None</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="pAddress">Address</label>
-                        <textarea id="pAddress" name="pAddress" class="form-control" placeholder="Enter address" required></textarea>
-                    </div>
-                    <div style="margin-top: 20px;">
-                        <button type="submit" class="btn btn-primary">Add Patient</button>
-                        <button type="reset" class="btn btn-outline">Reset</button>
-                    </div>
+
                 </form>
+
             </div>
         </main>
-    </div>
+
+
+        <!-- SIDEBAR -->
         <nav class="sidebar-right">
             <a href="index.html" class="nav-btn">
-                <i class="fa-regular fa-calendar-check"></i>
-                Appointments
+                <i class="fa-regular fa-calendar-check"></i> Appointments
             </a>
             <a href="billing.html" class="nav-btn">
-                <i class="fa-solid fa-file-invoice-dollar"></i>
-                Billing
+                <i class="fa-solid fa-file-invoice-dollar"></i> Billing
             </a>
             <a href="patients.html" class="nav-btn">
-                <i class="fa-solid fa-users"></i>
-                Patients
+                <i class="fa-solid fa-users"></i> Patients
             </a>
             <a href="rooms.html" class="nav-btn">
-                <i class="fa-solid fa-door-open"></i>
-                Rooms
+                <i class="fa-solid fa-door-open"></i> Rooms
             </a>
         </nav>
 
     </div>
 
 
+<script src="scripts.js"></script>
 
+<script>
 
-    <script src="scripts.js"></script>
+            function showToast(message) {
+        const toast = document.getElementById('success-toast');
+        if (toast) {
+            toast.querySelector('span').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        }
+document.getElementById('add-patient-form').addEventListener('submit', async function(event) {
+    event.preventDefault();
 
+    const url = "http://127.0.0.1:8000/patients/create";
+    const payload = {
+        pFullName: document.getElementById('pFullName').value,
+        pDob: document.getElementById('pDob').value,
+        pSex: document.getElementById('pSex').value,
+        pPhone: document.getElementById('pPhone').value,
+        pEmail: document.getElementById('pEmail').value,
+        pAddress: document.getElementById('pAddress').value,
+        pInsurance: document.getElementById('pInsurance').value
+    };
 
-    <script>
-        document.getElementById('add-patient-form').addEventListener('submit', async function(event) {
-            event.preventDefault();
-
-            const url = "http://127.0.0.1:8000/patients/create";
-            const payload = {
-                pFullName: document.getElementById('pFullName').value,
-                pDob: document.getElementById('pDob').value,
-                pSex: document.getElementById('pSex').value,
-                pPhone: document.getElementById('pPhone').value,
-                pEmail: document.getElementById('pEmail').value,
-                pAddress: document.getElementById('pAddress').value,
-                pInsurance: document.getElementById('pInsurance').value
-            };
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.text();
-                console.log(result);
-                if (response.ok) {
-                    window.location.href = 'patients.html';
-                } 
-            } catch (error) {
-                console.error('Error:', error);
-            }
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
+
+        if (response.ok) {
+            showToast("Patient added successfully!");
+            setTimeout(() => window.location.href = 'patients.html', 1500);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+});
 </script>
+
+</body>
+</html>

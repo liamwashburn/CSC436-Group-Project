@@ -3,128 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Doctors Office</title>
-    
+    <title>Resolve Appointment</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+
+    <style>
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 14px;
+            border-left: 5px solid var(--primary);
+            padding-left: 10px;
+        }
+
+        .form-card {
+            background: rgba(255,255,255,0.55);
+            padding: 25px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .resolve-grid {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+        }
+    </style>
 </head>
+
 <body>
-    <div id="success-toast" class="toast-container">
-        <i class="fa-solid fa-circle-check"></i>
-        <span>Action Completed Successfully!</span>
-    </div>
 
-    <div class="layout-wrapper">
-        <main class="content-area">
-            <h1>Resolve Appointment: <span id="resolve-patient-name" style="color: var(--primary);">Patient Name</span></h1>
-            <div class="main-card">
-                <div class="resolve-grid">
-                    <div style="border-right: 1px solid var(--border); padding-right: 30px;">
-                        <h3 style="margin-bottom: 20px;">Doctor's Summary</h3>
-                        <div class="form-group">
-                            <label>Visit Notes</label>
-                            <textarea id="visit-notes" class="form-control summary-box" placeholder="Enter notes..."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Diagnosis</label>
-                            <input type="text" id="diagnosis" class="form-control" placeholder="Enter diagnosis...">
-                        </div>
-                        <div class="form-group">
-                            <label>Follow-up Required</label>
-                            <select id="followup" class="form-control">
-                                <option value="none">No follow-up needed</option>
-                                <option value="1week">1 Week</option>
-                                <option value="2weeks">2 Weeks</option>
-                                <option value="1month">1 Month</option>
-                                <option value="3months">3 Months</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Medications</label>
-                            <div class="medication-inputs" style="display: flex;">
-                            <input type="text" id="medication" class="form-control" placeholder="Enter medications...">
-                            <input type="text" id="dosage" class="form-control" placeholder="Dosage..." style="width: 80px;">
-                            <input type="text" id="Notes" class="form-control" placeholder="Notes..." style="width: 80px;">
-                            </div>
-                        </div>
+<div id="success-toast" class="toast-container">
+    <i class="fa-solid fa-circle-check"></i>
+    <span>Success</span>
+</div>
 
-                    </div>
-                    <div>
-                        <h3 style="margin-bottom: 20px;">Billing & Checkout</h3>
-                        <div class="form-group">
-                            <label>Base Consultation Fee</label>
-                            <input type="number" id="base-fee" class="form-control" value="150.00" onchange="calculateTotal()">
-                        </div>
-                        <div style="height: 1px; background: var(--border); margin: 20px 0;"></div>
-                        <div class="form-group">
-                            <label style="font-size: 1.1rem; font-weight: 700;">Total Due</label>
-                            <input type="text" id="total-amount" class="form-control" value="$150.00" style="font-weight: 700; color: var(--primary);" readonly>
-                        </div>
-                        
-                        <div style="margin-top: 40px; display: flex; gap: 10px; flex-direction: column;">
-                            <button class="btn btn-primary" style="padding: 15px;" onclick="completeResolve()">Complete & Generate Bill</button>
-                            <button class="btn btn-outline" onclick="cancelResolve()">Cancel</button>
-                        </div>
-                    </div>
+<div class="layout-wrapper">
+
+<main class="content-area">
+
+    <h1>
+        Resolve Appointment:
+        <span id="resolve-patient-name" style="color: var(--primary);">Loading...</span>
+    </h1>
+
+    <div class="main-card">
+
+        <div class="resolve-grid">
+
+            <!-- LEFT -->
+            <div>
+                <h3 class="section-title">Doctor Summary</h3>
+                <div class="form-card">
+                    <label>Visit Notes</label>
+                    <textarea id="visit-notes" class="form-control summary-box"></textarea>
                 </div>
             </div>
-        </main>
-        <nav class="sidebar-right">
-            <a href="index.html" class="nav-btn">
-                <i class="fa-regular fa-calendar-check"></i>
-                Appointments
-            </a>
-            <a href="billing.html" class="nav-btn">
-                <i class="fa-solid fa-file-invoice-dollar"></i>
-                Billing
-            </a>
-            <a href="patients.html" class="nav-btn">
-                <i class="fa-solid fa-users"></i>
-                Patients
-            </a>
-            <a href="rooms.html" class="nav-btn">
-                <i class="fa-solid fa-door-open"></i>
-                Rooms
-            </a>
-        </nav>
+
+            <!-- RIGHT -->
+            <div>
+
+                <h3 class="section-title">Billing & Checkout</h3>
+
+                <div class="form-card">
+
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="font-weight:700;">Base Fee</span>
+                        <span id="base-fee">$150.00</span>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; margin-top:10px;">
+                        <span>Insurance Coverage</span>
+                        <span id="insurance-status">Checking...</span>
+                    </div>
+
+                    <hr style="margin:18px 0;">
+
+                    <div style="display:flex; justify-content:space-between; font-size:1.2rem; font-weight:700;">
+                        <span>Total Due</span>
+                        <span id="total-due">$150.00</span>
+                    </div>
+
+                </div>
+
+                <div style="margin-top: 20px; display:flex; flex-direction:column; gap:10px;">
+                    <button class="btn btn-primary" onclick="completeResolve()">Complete & Generate Bill</button>
+                    <button class="btn btn-outline" onclick="cancelResolve()">Cancel</button>
+                </div>
+
+            </div>
+
+        </div>
 
     </div>
 
+</main>
 
-<script src="scripts.js"></script>
+<nav class="sidebar-right">
+    <a href="index.html" class="nav-btn">Appointments</a>
+    <a href="billing.html" class="nav-btn">Billing</a>
+    <a href="patients.html" class="nav-btn">Patients</a>
+</nav>
 
+</div>
 
 <script>
-    function completeResolve() {
-        const url = "http://127.0.0.1:8000/medical-records/create";
+let BASE_FEE = 150;
+let insuranceDiscount = 0;
 
-        const payload = {
-            pID: 1,
-            appID: 1,
-            notes: document.getElementById("visit-notes").value,
-            pmName: document.getElementById("medication").value,
-            pmDosage: document.getElementById("dosage").value
-        };
+let appID = null;
+let pID = null;  // NOW OBTAINED FROM APPOINTMENT LOOKUP
 
-        fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
-        })
-        .then(response => {
-            if (response.ok) {
-                document.getElementById("success-toast").style.display = "block";
-                setTimeout(() => {
-                    document.getElementById("success-toast").style.display = "none";
-                }, 3000);
-            } else {
-                console.error("Failed to complete resolve:", response.statusText);
-            }
-        })
-        .catch(error => console.error("Error:", error));
+document.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+
+    appID = params.get("appID");
+
+    if (!appID) {
+        alert("Missing appID in URL!");
+        return;
     }
 
+    loadAppointmentDetails();
+});
+
+async function loadAppointmentDetails() {
+    try {
+        const res = await fetch(`http://127.0.0.1:8000/appointments/${appID}`);
+        const data = await res.json();
+
+        if (!data || !data.appointment) {
+            document.getElementById("resolve-patient-name").innerText = "Unknown";
+            return;
+        }
+
+        const appointment = data.appointment;
+
+        pID = appointment.pID;  // STORE pID from appointment
+
+        document.getElementById("resolve-patient-name").innerText = appointment.pFullName;
+
+        checkInsurance();
+
+    } catch (err) {
+        console.error("Failed to load appointment:", err);
+        document.getElementById("resolve-patient-name").innerText = "Error loading patient";
+    }
+}
+
+async function checkInsurance() {
+    const box = document.getElementById("insurance-status");
+
+    try {
+        const res = await fetch(`http://127.0.0.1:8000/hasInsurance/${pID}`);
+        const data = await res.json();
+
+        if (data.hasInsurance) {
+            insuranceDiscount = 150;
+            box.innerHTML = `<span style="color:green;">- $150 (Covered)</span>`;
+        } else {
+            insuranceDiscount = 0;
+            box.innerHTML = `<span style="color:#991b1b;">No Coverage</span>`;
+        }
+
+        updateTotal();
+    } catch {
+        box.innerText = "Error";
+    }
+}
+
+function updateTotal() {
+    const total = BASE_FEE - insuranceDiscount;
+    document.getElementById("total-due").innerText = `$${total}.00`;
+}
+
+function completeResolve() {
+    const payload = {
+        appID: Number(appID),
+        bCost: BASE_FEE - insuranceDiscount,
+        notes: document.getElementById("visit-notes").value,
+    };
+
+    fetch("http://127.0.0.1:8000/medical-records/create", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+    }).then(r => {
+        if (r.ok) {
+            showToast("Resolved & Billed!");
+            setTimeout(() => window.location.href = "billing.html", 1500);
+        }
+    });
+}
+
+function cancelResolve() {
+    window.location.href = "index.html";
+}
+
+function showToast(msg) {
+    const toast = document.getElementById("success-toast");
+    toast.querySelector("span").innerText = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2500);
+}
 </script>
+
+</body>
+</html>

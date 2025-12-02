@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Doctors Office</title>
-    
+    <title>Room Availability</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
     <div id="success-toast" class="toast-container">
         <i class="fa-solid fa-circle-check"></i>
         <span>Action Completed Successfully!</span>
@@ -17,21 +18,26 @@
 
     <div class="layout-wrapper">
         <main class="content-area">
+
             <h1>Room Availability</h1>
+
             <div class="main-card">
                 <div class="controls-header">
                     <div style="display:flex; align-items:center; gap:10px;">
                         <label>Date:</label>
-                        <input type="date" id="date-selector" style="padding: 8px; border:1px solid var(--border); border-radius:6px;" onchange="loadRoomData()">
+                        <input type="date" id="date-selector"
+                               style="padding: 8px; border:1px solid var(--border); border-radius:6px;"
+                               onchange="loadRoomData()">
                     </div>
                 </div>
 
                 <div class="scroll-wrapper">
-                    <div class="timeline-container" id="timeline-container">
-                    </div>
+                    <div class="timeline-container" id="timeline-container"></div>
                 </div>
             </div>
+
         </main>
+
         <nav class="sidebar-right">
             <a href="index.html" class="nav-btn">
                 <i class="fa-regular fa-calendar-check"></i>
@@ -50,5 +56,139 @@
                 Rooms
             </a>
         </nav>
-
     </div>
+
+    <script src="scripts.js"></script>
+
+  <script>
+    const timeSlots = [
+        "08:00","09:00","10:00","11:00",
+        "12:00","13:00","14:00","15:00","16:00"
+    ];
+
+    const defaultRooms = [
+        { roomNumber: "A", TimeSlot: null, pName: null },
+        { roomNumber: "B", TimeSlot: null, pName: null },
+        { roomNumber: "C", TimeSlot: null, pName: null },
+        { roomNumber: "D", TimeSlot: null, pName: null },
+        { roomNumber: "E", TimeSlot: null, pName: null }
+    ];
+
+    function extractTime(appTime) {
+    return appTime.split("T")[1].substring(0,5); // "09:00"
+}
+
+    // Build timeline
+    function renderRoomTimeline(rooms) {
+        const container = document.getElementById("timeline-container");
+        let html = "";
+
+        // Determine if date is today + current hour for greying out
+        const selectedDate = document.getElementById("date-selector").value;
+        const todayDate = new Date().toISOString().split("T")[0];
+
+        let currentHour = null;
+        if (selectedDate === todayDate) {
+            const now = new Date();
+            currentHour = now.getHours(); // numeric 24h
+        }
+
+        html += "<div></div>";
+        timeSlots.forEach(t => html += `<div class='time-header'>${t}</div>`);
+
+        rooms.forEach(room => {
+            html += `<div class="room-row-label">Room ${room.roomNumber}</div>`;
+
+            timeSlots.forEach(slot => {
+                const isBooked = slot === room.TimeSlot;
+                const slotHour = parseInt(slot.split(":")[0]);
+
+                // Check if this slot is in the past
+                const isPast = currentHour !== null && slotHour < currentHour;
+
+                if (isBooked) {
+                    html += `
+                        <div class="time-slot occupied">
+                            <div class="slot-name">${room.pName}</div>
+                            <div class="slot-reason">${slot} - ${addOneHour(slot)}</div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="time-slot empty ${isPast ? "past" : ""}"
+                             ${!isPast ? `onclick="bookSlot('${room.roomNumber}', '${slot}')"` : ""}>
+                        </div>
+                    `;
+                }
+            });
+        });
+
+        container.innerHTML = html;
+    }
+
+    function addOneHour(time) {
+        const [h, m] = time.split(":").map(Number);
+        return `${String(h+1).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+    }
+
+    function bookSlot(roomNumber, timeSlot) {
+        const date = document.getElementById("date-selector").value;
+        window.location.href = `reserve.html?room=${roomNumber}&time=${timeSlot}&date=${date}`;
+    }
+
+    async function loadRoomData() {
+        const container = document.getElementById("timeline-container");
+        container.innerHTML = '<div class="loading"><span class="spinner"></span>Loading...</div>';
+
+        const selectedDate = document.getElementById("date-selector").value;
+        const fileName = `rooms-${selectedDate}.json`;
+
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/rooms/${selectedDate}`);
+
+            if (!response.ok) {
+                renderRoomTimeline(defaultRooms);
+                return;
+            }
+
+            const data = await response.json();
+
+            const mergedRooms = defaultRooms.map(def => {
+                const match = data.rooms?.find(r => r.rType === def.roomNumber);
+
+                if (!match) return def;
+
+                return {
+                    roomNumber: match.rType,
+                    TimeSlot: extractTime(match.appTime),
+                    pName: match.pFullName
+                };
+            });
+
+            renderRoomTimeline(mergedRooms);
+
+        } catch (err) {
+            renderRoomTimeline(defaultRooms);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("date-selector").value = today;
+        loadRoomData();
+    });
+
+    function showToast(message) {
+        const toast = document.getElementById('success-toast');
+        if (toast) {
+            toast.querySelector('span').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+}
+</script>
+
+</body>
+</html>

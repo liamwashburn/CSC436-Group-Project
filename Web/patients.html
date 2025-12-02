@@ -67,6 +67,16 @@
 <script src="script.js"></script>
 
 <script>
+    function showToast(message) {
+        const toast = document.getElementById('success-toast');
+        if (toast) {
+            toast.querySelector('span').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+}
         async function fetchPatients() {
             const response = await fetch('http://127.0.0.1:8000/patients/');
             const data = await response.json();
@@ -94,7 +104,8 @@
                     <td>${formattedLastAppointment}</td>
                     <td>
                         <div class="btn-action-group">
-                            <button class="btn btn-outline" onclick="viewRecords('${patient.pID}', '${patient.pFullName}')">Edit</button>
+                            <button class="btn btn-outline" onclick="editPatient('${patient.pID}')">Details</button>
+                            <button class="btn btn-outline" onclick="MedicalRecords('${patient.pID}')">Records</button>
                         </div>
                     </td>
                 `;
@@ -105,6 +116,14 @@
 
     fetchPatients();
 
+
+    function editPatient(pID) {
+    window.location.href = `editpatient.html?pID=${pID}`;
+    }
+
+    function MedicalRecords(pID) {
+    window.location.href = `medicalrecords.html?pID=${pID}`;
+    }
 
 
     function addNewPatient() {

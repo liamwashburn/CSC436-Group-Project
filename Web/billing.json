@@ -1,0 +1,32 @@
+{
+    "billing": [
+        {
+            "pID": 1,
+            "pFullName": "Johnathan Miller",
+            "totalBalance": 150.00,
+            "status": "unpaid",
+            "frozen": false
+        },
+        {
+            "pID": 2,
+            "pFullName": "Emily Carter",
+            "totalBalance": 300.00,
+            "status": "unpaid",
+            "frozen": true
+        },
+        {
+            "pID": 3,
+            "pFullName": "Michael Anderson",
+            "totalBalance": 0.00,
+            "status": "paid",
+            "frozen": false
+        },
+        {
+            "pID": 4,
+            "pFullName": "Sarah Thompson",
+            "totalBalance": 150.00,
+            "status": "unpaid",
+            "frozen": false
+        }
+    ]
+}

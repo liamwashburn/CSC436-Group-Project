@@ -255,7 +255,7 @@ input:checked + .slider:before {
     height: 100px;
     position: relative;
     transition: 0.2s;
-    border: 0.5px solid rgba(0, 0, 0, 0.062);
+    border: 0.5px solid rgba(0, 0, 0, 0.148);
 }
 
 .time-slot.empty {
@@ -376,3 +376,27 @@ input:checked + .slider:before {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+.time-slot.past {
+    background-color: rgba(46, 23, 4, 0.142);
+    cursor: not-allowed !important;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+td.actions-cell {
+    text-align: right;
+    padding-right: 20px;
+}
+
+.action-btn-group {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn-group .btn {
+    width: 90px;       
+    text-align: center;
+    padding: 8px 0;
+}
+
