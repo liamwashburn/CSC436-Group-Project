@@ -117,7 +117,7 @@ def get_today_rooms(date: str):
     return {"rooms": rooms}
 
 
-
+# POST, Create/Update Medical Record and Update Billing
 @app.post("/medical-records/create")
 async def create_medical_record(request: Request):
     data = await request.json()
@@ -130,9 +130,6 @@ async def create_medical_record(request: Request):
     cursor = conn.cursor()
 
     try:
-        # -------------------------------------------
-        # 1. Get the appointment info
-        # -------------------------------------------
         cursor.execute("""
             SELECT pID, dID 
             FROM Appointments
@@ -143,19 +140,13 @@ async def create_medical_record(request: Request):
         if not appt:
             return {"status": "error", "message": "Invalid appID"}
 
-        pID, dID = appt  # POPULATED FROM DATABASE
+        pID, dID = appt
 
-        # -------------------------------------------
-        # 2. Insert medical record (no medID needed)
-        # -------------------------------------------
         cursor.execute("""
             INSERT INTO MedicalRecords (notes, pID, dID, appID)
             VALUES (%s, %s, %s, %s)
         """, (notes, pID, dID, appID))
 
-        # -------------------------------------------
-        # 3. Billing (update existing OR create new)
-        # -------------------------------------------
         cursor.execute("""
             SELECT bID, bCost FROM Billing
             WHERE pID = %s
@@ -180,9 +171,6 @@ async def create_medical_record(request: Request):
                 VALUES (%s, %s, %s, %s, FALSE)
             """, (pID, appID, bCost, bCost >= 150))
 
-        # -------------------------------------------
-        # 4. Mark appointment completed
-        # -------------------------------------------
         cursor.execute("""
             UPDATE Appointments
             SET appCompleted = TRUE
@@ -199,7 +187,8 @@ async def create_medical_record(request: Request):
     finally:
         cursor.close()
         conn.close()  
-# POST, Add a New Patient
+
+# POST, Add/Insert a New Patient
 @app.post("/patients/create")
 async def create_patient(request: Request):
     data = await request.json()
@@ -239,6 +228,7 @@ async def create_patient(request: Request):
         cursor.close()
         conn.close()
 
+# POST, Update Patient Information
 @app.post("/patient/update")
 async def update_patient(request: Request):
     data = await request.json()
@@ -374,9 +364,7 @@ async def list_doctors():
     return {"doctors": names}
 
 
-# -----------------------------------------
-# 3) POST RESERVATION APPOINTMENT ENDPOINT
-# -----------------------------------------
+# Post, Reserve a Room/Appointment
 @app.post("/reserve")
 async def reserve_room(request: Request):
     data = await request.json()
